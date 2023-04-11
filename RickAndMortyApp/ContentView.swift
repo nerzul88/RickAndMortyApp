@@ -8,19 +8,36 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var viewModel = CharactersViewModel()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        List {
+            ForEach(viewModel.characters) { character in
+                let isLast = viewModel.characters.isLast(character)
+                Text(character.name)
+                    .onAppear {
+                        if isLast {
+                            viewModel.fetchCharacters()
+                        }
+                    }
+                    .progressBar(isLoading: isLast && viewModel.isLoading)
+            }
         }
-        .padding()
+        .onAppear {
+            viewModel.fetchCharacters()
+        }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+private extension View {
+    func progressBar(isLoading: Bool) -> some View {
+        self
+            .modifier(ProgressBarModifier(withLoading: isLoading))
     }
 }
